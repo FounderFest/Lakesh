@@ -1,0 +1,26 @@
+{
+  "name": "lakeshbackend",
+  "version": "1.0.0",
+  "description": "Backend para comunicacion entre android app y base de datos",
+  "main": "app.js",
+  "scripts": {
+    "test": "node app.js"
+  },
+  "keywords": [
+    "lakesh",
+    "app",
+    "backend",
+    "node",
+    "android",
+    "web",
+    "seocket"
+  ],
+  "author": "Carlos Linares",
+  "license": "MIT",
+  "dependencies": {
+    "body-parser": "^1.14.2",
+    "express": "^4.13.3",
+    "mongodb": "^2.1.4",
+    "ws": "^1.0.1"
+  }
+}

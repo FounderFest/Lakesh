@@ -2,9 +2,6 @@
 // App.js
 // Conexion con la base de datos de mongo
 
-var ws = require("ws").Server,
-    wss = new ws({port:3000});
-    
 var bodyParser = require("body-parser");
    
 var express = require("express"),
@@ -74,8 +71,4 @@ MongoClient.connect('mongodb://localhost:27017/lakesh', function(err, db) {
             res.send(JSON.stringify({error:"Beacon Header no especificado"}));
         }
     });
-    
-    // TODO: Web Socket
-    // Cachar peticion de app
-    // Enviar informacion solicitada
 });

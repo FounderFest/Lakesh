@@ -1,5 +1,6 @@
 package com.mezcalab.therapedic;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.os.RemoteException;
 import android.support.design.widget.NavigationView;
@@ -16,10 +17,9 @@ import org.altbeacon.beacon.Beacon;
 import org.altbeacon.beacon.BeaconConsumer;
 import org.altbeacon.beacon.BeaconManager;
 import org.altbeacon.beacon.BeaconParser;
-import org.altbeacon.beacon.MonitorNotifier;
+import org.altbeacon.beacon.Identifier;
 import org.altbeacon.beacon.RangeNotifier;
 import org.altbeacon.beacon.Region;
-import org.altbeacon.bluetooth.BluetoothCrashResolver;
 
 import java.util.Collection;
 import java.util.Iterator;
@@ -27,7 +27,7 @@ import java.util.Iterator;
 public class MainActivity extends AppCompatActivity implements BeaconConsumer,
         NavigationView.OnNavigationItemSelectedListener {
     protected static final String TAG = "MainActivity";
-    private BluetoothCrashResolver crashResolver;
+    private static final double MAX_DIST = 0.079;
     private BeaconManager beaconManager;
 
     @Override
@@ -46,20 +46,18 @@ public class MainActivity extends AppCompatActivity implements BeaconConsumer,
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
-        crashResolver = new BluetoothCrashResolver(this.getApplicationContext());
-        crashResolver.start();
-
         beaconManager = BeaconManager.getInstanceForApplication(this);
         beaconManager.getBeaconParsers().add(new BeaconParser().
                 setBeaconLayout("m:2-3=0215,i:4-19,i:20-21,i:22-23,p:24-24,d:25-25"));
         beaconManager.bind(this);
+        InfoColchon.setBeaconManager(beaconManager);
+        InfoColchon.setMainActivity(this);
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
         beaconManager.unbind(this);
-        crashResolver.stop();
     }
 
     @Override
@@ -70,15 +68,17 @@ public class MainActivity extends AppCompatActivity implements BeaconConsumer,
                 if (beacons.size() > 0) {
                     int number = beacons.size();
                     Log.d(TAG, "Se encontraron:  " + number + " Beacons");
-                    for(Iterator i = beacons.iterator(); i.hasNext(); ) {
+                    for (Iterator i = beacons.iterator(); i.hasNext(); ) {
                         Beacon beacon = (Beacon) i.next();
-                        //Collection<long> dataFields = beacon.getExtraDataFields();
+                        Log.d(TAG, beacon.toString());
                         //Id1 es lo que se define en la pagina de kontak.io como el proximity UUID
-                        Log.d(TAG, "Un beacon con id:  " + beacon.getDistance() + " " + beacon.getBluetoothAddress());
-                        /*for(int j = 0; j < dataFields.size(); j++) {
-                            long data = dataFields.iterator().next();
-                            Log.d(TAG, "Data " + j + "= " + data);
-                        }*/
+                        //Id2 es el minor, que puede ser utilizado para identificar al beacon en especifico
+                        Identifier id = beacon.getId3();
+                        Log.d(TAG, "Un beacon a:  " + beacon.getDistance() + " metros " + beacon.getBluetoothAddress());
+                        if (beacon.getDistance() < MAX_DIST) {
+                            openInfo(id.toString());
+                            break;
+                        }
                     }
                 }
             }
@@ -87,29 +87,6 @@ public class MainActivity extends AppCompatActivity implements BeaconConsumer,
         try {
             beaconManager.startRangingBeaconsInRegion(new Region("myRangingUniqueId", null, null, null));
         } catch (RemoteException e) {   }
-        /*beaconManager.setMonitorNotifier(new MonitorNotifier() {
-            @Override
-            public void didEnterRegion(Region region) {
-
-                Log.i(TAG, "I just saw an beacon for the first time! " + region.getUniqueId());
-            }
-
-            @Override
-            public void didExitRegion(Region region) {
-                Log.i(TAG, "I no longer see an beacon");
-            }
-
-            @Override
-            public void didDetermineStateForRegion(int state, Region region) {
-                Log.i(TAG, "I have just switched from seeing/not seeing beacons: " + state);
-            }
-        });
-
-        try {
-            beaconManager.startMonitoringBeaconsInRegion(new Region("myMonitoringUniqueId", null, null, null));
-        } catch (RemoteException e) {    }*/
-        //beaconManager.
-        //crashResolver.notifyScannedDevice();
     }
 
     @Override
@@ -129,7 +106,7 @@ public class MainActivity extends AppCompatActivity implements BeaconConsumer,
         return true;
     }
 
-    @Override
+    /*@Override
     public boolean onOptionsItemSelected(MenuItem item) {
         // Handle action bar item clicks here. The action bar will
         // automatically handle clicks on the Home/Up button, so long
@@ -142,7 +119,7 @@ public class MainActivity extends AppCompatActivity implements BeaconConsumer,
         }
 
         return super.onOptionsItemSelected(item);
-    }
+    }*/
 
     @SuppressWarnings("StatementWithEmptyBody")
     @Override
@@ -161,11 +138,17 @@ public class MainActivity extends AppCompatActivity implements BeaconConsumer,
         } else if (id == R.id.nav_share) {
 
         } else if (id == R.id.nav_send) {
-
+            //openInfo();
         }
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
+    }
+
+    private void openInfo(String id) {
+        beaconManager.unbind(this);
+        InfoColchon.setIdBeacon(id);
+        startActivity(new Intent(this, InfoColchon.class));
     }
 }

@@ -4,5 +4,8 @@
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
 
-    <string name="action_settings">Settings</string>
+    <string name="action_settings">Ajustes</string>
+    <string name="mensaje">Mensaje invitando al usuario a interactuar con los colchones de therapedic...</string>
+    <string name="title_activity_info_colchon">Información Colchon</string>
+    <string name="caracteristicas">Nucleo de Resortes Super Coil\nEspumas Super Suave de Alta Densidad\nTela Tejido de Punto con Fibras Ultra Fresh\nDoble Lado"</string>
 </resources>
